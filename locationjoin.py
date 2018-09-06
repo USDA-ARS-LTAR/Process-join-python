@@ -36,7 +36,7 @@ try:
                     fldss2 = field.name[:6]
                     if (fldss1 == "Field"):
                         if (fldss2 != "Field_"):
-                            #print "Deleting " + field.name
+                            print "Deleting " + field.name
                             arcpy.DeleteField_management(fc, field.name)
     sheets = arcpy.ListTables()
     excelListpt = []
@@ -44,328 +44,489 @@ try:
     for sheet in sheets:    
         out_table = sheet
         print "Redoing columns for " + sheet        
-        outFc = sheet
-        fcs = [out_gdb + "/" + outFc]   #sheet = data[1]                            
+        outFc = sheet        
+        fcs = [out_gdb + "/" + outFc]   #sheet = data[1]
+        fld2Base = []
+        fld2New = []
         if sheet == "WeatherDaily": #ok
-            fld2Base = ["Temp_Max_d","Temp_Min_d","Precip_mm_","Bad_Value","RH__","Dew_Point","Wind_Speed","Solar_Radi","Solar_Ra_1","Soil_Temp","Soil_Tem_1","Wind_Direc","Open_Pan_E","Closed_Pan","Atmos_N_De","Total_Net","Snow_mm_d"]
-            fld2New  = ["Temp_Max_d_1","Temp_Min_d_1","Precip_mm__1","Bad_Value_1","RH___1","Dew_Point_1","Wind_Speed_1","Solar_Radi_1","Solar_Ra_1_1","Soil_Temp_1","Soil_Tem_1_1","Wind_Direc_1","Open_Pan_E_1","Closed_Pan_1","Atmos_N_De_1","Total_Net_1","Snow_mm_d_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1            
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Bad_Value":
+                    if (fld2Base[i].find("Bad_Value") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Integer", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-        elif sheet == "WeatherStation": #ok
-            fld2Base = ["Weather_La","Weather_Lo","Weather_El","Distance_f","Direction","Weather__1"]
-            fld2New  = ["Weather_La_1","Weather_Lo_1","Weather_El_1","Distance_f_1","Direction_1","Weather__1_1"]
+        elif sheet == "WeatherStation": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 4):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1   
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if (fld2Base[i] == "Direction") or (fld2Base[i] == "Weather__1"):
+                    if (fld2Base[i].find("Direction") > -1) or (fld2Base[i].find("Weather__1") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-        elif sheet == "Overview": #ok
-            fld2Base = ["Duration_o"]
-            fld2New  = ["Duration_o_1"]
+        elif sheet == "Overview": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 8):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1   
             for fc in fcs:
                 for i in range(0, len(fld2Base)):                
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])        
-        elif sheet == "ExperUnits": #ok
-            fld2Base = ["Latitude","Longitude","Slope__","Exp_Unit_S"]
-            fld2New  = ["Latitude_1","Longitude_1","Slope___1","Exp_Unit_S_1"]
+        elif sheet == "ExperUnits": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 9):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1   
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
-                    arcpy.DeleteField_management(fc, fld2Base[i])                          
-        elif sheet == "MeasSoilPhys": #ok           
-            fld2Base = ["Upper_cm","Lower_cm","Model_if_s","Sand__","Silt__","Clay__","Bulk_Densi","Wilting_Po","Field_Capa","Ksat_cm_se","Moisture_R","Soil_Heat","Aggregatio","H2O_Stable","Near_Infra","Bulk_Den_1","Wilting__1","Field_Ca_1","Ksat_STD_c","Soil_Hea_1","Macro_Aggr","H2O_Stab_1","Near_Inf_1"]
-            fld2New  = ["Upper_cm_1","Lower_cm_1","Model_if_s_1","Sand___1","Silt___1","Clay___1","Bulk_Densi_1","Wilting_Po_1","Field_Capa_1","Ksat_cm_se_1","Moisture_R_1","Soil_Heat_1","Aggregatio_1","H2O_Stable_1","Near_Infra_1","Bulk_Den_1_1","Wilting__1_1","Field_Ca_1_1","Ksat_STD_c_1","Soil_Hea_1_1","Macro_Aggr_1","H2O_Stab_1_1","Near_Inf_1_1"]
+                    arcpy.DeleteField_management(fc, fld2Base[i])
+        elif sheet == "MeasSoilPhys": #ok                       
+            j = 0
             for fc in fcs:
-                for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Model_if_s":
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 3):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
+            for fc in fcs:
+                for i in range(0, len(fld2Base)):                    
+                    if (fld2Base[i].find("Model_if_s") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])            
-        elif sheet == "MeasSoilChem": #ok           
-            fld2Base = ["Upper_cm","Lower_cm","Model_if_s","pH","TSC_gC_kg","TSN_gN_kg","Inorganic","Organic_C","Mineral_C","CEC_cmol_k","Electric_C","Soluble_C","NH4_mgN_kg","NO3_mgN_kg","P_mgP_kg","K_mgK_kg","Ca_mgCa_kg","Mg_mgMg_kg","Cu_mgCu_kg","Fe_mgFe_kg","Mn_mgMN_kg","Zn_mgZn_kg","Mineraliza","Nitrite_mg","Cesium_137","Lead_210_B","Beryllium_","pH_STD","TSC_STD_gC","TSN_STD_gN","Inorgani_1","Organic_ST","Mineral__1","CEC_STD_cm","Electric_1","Soluble__1","NH4_STD_mg","NO3_STD_mg","P_STD_mgP_","K_STD_mgK_","Ca_STD_mgC","Mg_STD_mgM","Cu_STD_mgC","Fe_STD_mgF","Mn_STD_mgM","Zn_STD_mgZ","Minerali_1","Nitrite_ST","Cesium_138","Lead_210_S","Beryllium1"]
-            fld2New  = ["Upper_cm_1","Lower_cm_1","Model_if_s_1","pH_1","TSC_gC_kg_1","TSN_gN_kg_1","Inorganic_1","Organic_C_1","Mineral_C_1","CEC_cmol_k_1","Electric_C_1","Soluble_C_1","NH4_mgN_kg_1","NO3_mgN_kg_1","P_mgP_kg_1","K_mgK_kg_1","Ca_mgCa_kg_1","Mg_mgMg_kg_1","Cu_mgCu_kg_1","Fe_mgFe_kg_1","Mn_mgMN_kg_1","Zn_mgZn_kg_1","Mineraliza_1","Nitrite_mg_1","Cesium_137_1","Lead_210_B_1","Beryllium__1","pH_STD_1","TSC_STD_gC_1","TSN_STD_gN_1","Inorgani_1_1","Organic_ST_1","Mineral__1_1","CEC_STD_cm_1","Electric_1_1","Soluble__1_1","NH4_STD_mg_1","NO3_STD_mg_1","P_STD_mgP__1","K_STD_mgK__1","Ca_STD_mgC_1","Mg_STD_mgM_1","Cu_STD_mgC_1","Fe_STD_mgF_1","Mn_STD_mgM_1","Zn_STD_mgZ_1","Minerali_1_1","Nitrite_ST_1","Cesium_138_1","Lead_210_S_1","Beryllium1_1"]
+        elif sheet == "MeasSoilChem": #ok                       
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 3):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Model_if_s":
+                    if (fld2Base[i].find("Model_if_s") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-        elif sheet == "MeasSoilBiol": #ok
-            fld2Base = ["Upper_cm","Lower_cm","Model_if_s","Glucosidas","Glucosamin","Acid_Phosp","Alk_Phosph","Fluorescei","Glomalin_g","FAME","PLFA","DNA","Iden_Plant","POM_gC_kg","Microbe_Bi","Microbe__1","Glucosid_1","Glucosam_1","Acid_Pho_1","Alk_Phos_1","Fluoresc_1","Glomalin_S","Iden_Pla_1","POM_STD_gC","Microbe__2","Microbe__3"]
-            fld2New  = ["Upper_cm_1","Lower_cm_1","Model_if_s_1","Glucosidas_1","Glucosamin_1","Acid_Phosp_1","Alk_Phosph_1","Fluorescei_1","Glomalin_g_1","FAME_1","PLFA_1","DNA_1","Iden_Plant_1","POM_gC_kg_1","Microbe_Bi_1","Microbe__1_1","Glucosid_1_1","Glucosam_1_1","Acid_Pho_1_1","Alk_Phos_1_1","Fluoresc_1_1","Glomalin_S_1","Iden_Pla_1_1","POM_STD_gC_1","Microbe__2_1","Microbe__3_1"]
+        elif sheet == "MeasSoilBiol": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 3):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "FAME":
+                    if (fld2Base[i].find("FAME") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "PLFA":
+                    elif (fld2Base[i].find("PLFA") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "DNA":
+                    elif (fld2Base[i].find("DNA") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Model_if_s":
+                    elif (fld2Base[i].find("Model_if_s") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                        
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
-                    arcpy.DeleteField_management(fc, fld2Base[i])                    
-        elif sheet == "MeasResidueMgnt": #ok
-            fld2Base = ["Corn_Ear_H","Above_G_Bi","Unit_Grain","Grain_Dry","Grain_Mois","Grain_C_kg","Grain_N_kg","Harv_NonGr","Harv_Res_M","Harv_Res_C","Harv_Res_N","NonHarv_No","NonHarv_Re","NonHarv__1","NonHarv__2","Root_Dry_M","Root_Moist","Root_C_kgC","Root_N_kgN","Corn_Ear_1","Above_G__1","Unit_Gra_1","Grain_Dr_1","Grain_Mo_1","Grain_C_ST","Grain_N_ST","Harv_Non_1","Harv_Res_1","Harv_Res_2","Harv_Res_3","NonHarv__3","NonHarv__4","NonHarv__5","NonHarv__6","Root_Dry_1","Root_Moi_1","Root_C_STD","Root_N_STD"]
-            fld2New  = ["Corn_Ear_H_1","Above_G_Bi_1","Unit_Grain_1","Grain_Dry_1","Grain_Mois_1","Grain_C_kg_1","Grain_N_kg_1","Harv_NonGr_1","Harv_Res_M_1","Harv_Res_C_1","Harv_Res_N_1","NonHarv_No_1","NonHarv_Re_1","NonHarv__1_1","NonHarv__2_1","Root_Dry_M_1","Root_Moist_1","Root_C_kgC_1","Root_N_kgN_1","Corn_Ear_1_1","Above_G__1_1","Unit_Gra_1_1","Grain_Dr_1_1","Grain_Mo_1_1","Grain_C_ST_1","Grain_N_ST_1","Harv_Non_1_1","Harv_Res_1_1","Harv_Res_2_1","Harv_Res_3_1","NonHarv__3_1","NonHarv__4_1","NonHarv__5_1","NonHarv__6_1","Root_Dry_1_1","Root_Moi_1_1","Root_C_STD_1","Root_N_STD_1"]
+                    arcpy.DeleteField_management(fc, fld2Base[i])
+        elif sheet == "MeasResidueMgnt": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-        elif sheet == "MeasSoilCover": #ok
-            fld2Base = ["Soil_w_Res"]
-            fld2New  = ["Soil_w_Res_1"]          
+        elif sheet == "MeasSoilCover": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-        elif sheet == "MeasHarvestFraction": #ok
-            fld2Base = ["Frac_Dry_M","Frac_Moist","Frac_C_kgC","Frac_N_kgN","Grain_Weig","Frac_Dry_1","Frac_Moi_1","Frac_C_STD","Frac_N_STD","Frac_Dry_M","Frac_Moist","Frac_C_kgC","Frac_N_kgN","Grain_Weig","Frac_Dry_1","Frac_Moi_1","Frac_C_STD","Frac_N_STD","Frac_Dry_M","Frac_Moist","Frac_C_kgC","Frac_N_kgN","Grain_Weig","Frac_Dry_1","Frac_Moi_1","Frac_C_STD","Frac_N_STD","Grain_We_1"]
-            fld2New  = ["Frac_Dry_M_1","Frac_Moist_1","Frac_C_kgC_1","Frac_N_kgN_1","Grain_Weig_1","Frac_Dry_1_1","Frac_Moi_1_1","Frac_C_STD_1","Frac_N_STD_1","Frac_Dry_M_1","Frac_Moist_1","Frac_C_kgC_1","Frac_N_kgN_1","Grain_Weig_1","Frac_Dry_1_1","Frac_Moi_1_1","Frac_C_STD_1","Frac_N_STD_1","Frac_Dry_M_1","Frac_Moist_1","Frac_C_kgC_1","Frac_N_kgN_1","Grain_Weig_1","Frac_Dry_1_1","Frac_Moi_1_1","Frac_C_STD_1","Frac_N_STD_1","Grain_We_1_1"]
+        elif sheet == "MeasHarvestFraction": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-        elif sheet == "MeasBiomassMinAn": #ok           
-            fld2Base = ["C_Concentr","N_Concentr","P_Concentr","K_Concentr","Ca_Concent","Mg_Concent","S_Concentr","Na_Concent","Cl_Concent","Al_Concent","B_Concentr","Cu_Concent","Fe_Concent","Mn_Concent","Zn_Concent","C_Concen_1","N_Concen_1","P_Concen_1","K_Concen_1","Ca_Conce_1","Mg_Conce_1","S_Concen_1","Na_Conce_1","Cl_Conce_1","Al_Conce_1","B_Concen_1","Cu_Conce_1","Fe_Conce_1","Mn_Conce_1","Zn_Conce_1"]
-            fld2New  = ["C_Concentr_1","N_Concentr_1","P_Concentr_1","K_Concentr_1","Ca_Concent_1","Mg_Concent_1","S_Concentr_1","Na_Concent_1","Cl_Concent_1","Al_Concent_1","B_Concentr_1","Cu_Concent_1","Fe_Concent_1","Mn_Concent_1","Zn_Concent_1","C_Concen_1_1","N_Concen_1_1","P_Concen_1_1","K_Concen_1_1","Ca_Conce_1_1","Mg_Conce_1_1","S_Concen_1_1","Na_Conce_1_1","Cl_Conce_1_1","Al_Conce_1_1","B_Concen_1_1","Cu_Conce_1_1","Fe_Conce_1_1","Mn_Conce_1_1","Zn_Conce_1_1"]
+        elif sheet == "MeasBiomassMinAn": #ok                       
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):                    
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")                    
                     arcpy.DeleteField_management(fc,fld2Base[i])
-        elif sheet == "MgtAmendments": #ok
-            fld2Base = ["Amend_Dept","Amend_Type","Total_Amen","Total_N_Am","Total_P_Am","Total_K_Am","Total_Pest","Active_Ing","Pest_Targe","Pest_Place","Irrigation","Irrigati_1","Irrigati_2"]
-            fld2New  = ["Amend_Dept_1","Amend_Type_1","Total_Amen_1","Total_N_Am_1","Total_P_Am_1","Total_K_Am_1","Total_Pest_1","Active_Ing_1","Pest_Targe_1","Pest_Place_1","Irrigation_1","Irrigati_1_1","Irrigati_2_1"]
+        elif sheet == "MgtAmendments": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Amend_Type":
+                    if (fld2Base[i].find("Amend_Type") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Active_Ing":
+                    elif (fld2Base[i].find("Active_Ing") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Pest_Targe":
+                    elif (fld2Base[i].find("Pest_Targe") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Pest_Place":
+                    elif (fld2Base[i].find("Pest_Place") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Irrigati_1":
+                    elif (fld2Base[i].find("Irrigati_1") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")    
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])   
-        elif sheet == "MgtPlanting": #ok
-            fld2Base = ["Planting_R","Planting_D","Planting_M","Planting_1","Row_Width"]
-            fld2New  = ["Planting_R_1","Planting_D_1","Planting_M_1","Planting_1_1","Row_Width_1"]
+        elif sheet == "MgtPlanting": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Planting_M":
+                    if (fld2Base[i].find("Planting_M") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                    
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])   
-        elif sheet == "MgtTillage": #ok
-            fld2Base = ["Tillage__1","Tillage__2"]
-            fld2New  = ["Tillage__1_1","Tillage__2_1"]
+        elif sheet == "MgtTillage": #ok            
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Tillage__2":
+                    if (fld2Base[i].find("Tillage__2") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                    
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasGHGFlux": #ok
-            fld2Base = ["N2O_gN_ha_","N2O_Interp","CO2_gC_ha_","CO2_Interp","CH4_gC_ha_","CH4_Interp","Air_Temp_d","Soil_Temp","Soil_Moist","Soil_Moi_1","N2O_STD_gN","CO2_STD_gC","CH4_STD_gC","Air_Temp_S","Soil_Tem_1","Soil_Moi_2"]
-            fld2New  = ["N2O_gN_ha__1","N2O_Interp_1","CO2_gC_ha__1","CO2_Interp_1","CH4_gC_ha__1","CH4_Interp_1","Air_Temp_d_1","Soil_Temp_1","Soil_Moist_1","Soil_Moi_1_1","N2O_STD_gN_1","CO2_STD_gC_1","CH4_STD_gC_1","Air_Temp_S_1","Soil_Tem_1_1","Soil_Moi_2_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MgtGrazing": #ok
-            fld2Base = ["Stocking_R","Animal_Spe","Animal_Cla","Other_Even","Burn_Frequ","Burn_Inten"]
-            fld2New  = ["Stocking_R_1","Animal_Spe_1","Animal_Cla_1","Other_Even_1","Burn_Frequ_1","Burn_Inten_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 4):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Animal_Spe":
+                    if (fld2Base[i].find("Animal_Spe") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Animal_Cla":
+                    elif (fld2Base[i].find("Animal_Cla") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Other_Even":
+                    elif (fld2Base[i].find("Other_Even") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")
-                    elif fld2Base[i] == "Burn_Inten":
+                    elif (fld2Base[i].find("Burn_Inten") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                    
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])   
         elif sheet == "MeasGrazingPlants": #ok
-            fld2Base = ["AboveGr_Bi","Surface_Li","Standing_D","LAI_kg_ha","Biomass_N","Lignin__","Ground_Cov","AboveGr__1","AboveGr__2","BelowGr_Bi","BelowGr__1","ANPP_C_kgC","ANPP_N_kgN","BNPP_C_kgC","BNPP_N_kgN","AboveGr__3","Surface__1","Standing_1","LAI_STD_kg","Biomass__1","Lignin_STD","Ground_C_1","AboveGr__4","AboveGr__5","BelowGr__2","BelowGr__3","ANPP_C_STD","ANPP_N_STD","BNPP_C_STD","BNPP_N_STD"]
-            fld2New  = ["AboveGr_Bi_1","Surface_Li_1","Standing_D_1","LAI_kg_ha_1","Biomass_N_1","Lignin___1","Ground_Cov_1","AboveGr__1_1","AboveGr__2_1","BelowGr_Bi_1","BelowGr__1_1","ANPP_C_kgC_1","ANPP_N_kgN_1","BNPP_C_kgC_1","BNPP_N_kgN_1","AboveGr__3_1","Surface__1_1","Standing_1_1","LAI_STD_kg_1","Biomass__1_1","Lignin_STD_1","Ground_C_1_1","AboveGr__4_1","AboveGr__5_1","BelowGr__2_1","BelowGr__3_1","ANPP_C_STD_1","ANPP_N_STD_1","BNPP_C_STD_1","BNPP_N_STD_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])        
         elif sheet == "MeasBiomassCHO":#ok
-            fld2Base = ["Glucan_g_k","Xylan_g_kg","Galactan_g","Arabinan_g","Mannan_g_k","Lignin_g_k","Neutral_De","Acid_Det_F","Acid_Solub","Acid_Insol","Crude_Prot","Non_fiber","Ash_g_kg","Glucan_STD","Xylan_STD","Galactan_S","Arabinan_S","Mannan_STD","Lignin_STD","Neutral__1","Acid_Det_1","Acid_Sol_1","Acid_Ins_1","Crude_Pr_1","Non_fibe_1","Ash_STD_g_"]
-            fld2New  = ["Glucan_g_k_1","Xylan_g_kg_1","Galactan_g_1","Arabinan_g_1","Mannan_g_k_1","Lignin_g_k_1","Neutral_De_1","Acid_Det_F_1","Acid_Solub_1","Acid_Insol_1","Crude_Prot_1","Non_fiber_1","Ash_g_kg_1","Glucan_STD_1","Xylan_STD_1","Galactan_S_1","Arabinan_S_1","Mannan_STD_1","Lignin_STD_1","Neutral__1_1","Acid_Det_1_1","Acid_Sol_1_1","Acid_Ins_1_1","Crude_Pr_1_1","Non_fibe_1_1","Ash_STD_g__1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
-
         elif sheet == "MeasBiomassEnergy": #ok
-            fld2Base = ["Volatile_M","Mineral_Ma","Gross_Calo","Volatile_1","Ash_STD_g_","Gross_Ca_1"]
-            fld2New  = ["Volatile_M_1","Mineral_Ma_1","Gross_Calo_1","Volatile_1_1","Ash_STD_g__1","Gross_Ca_1_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MgtResidue": #ok
-            fld2Base = ["Cutting_He","Rows_Harve","Stand_Age","Stage_at_H"]
-            fld2New  = ["Cutting_He_1","Rows_Harve_1","Stand_Age_1","Stage_at_H_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Stage_at_H":
+                    if (fld2Base[i].find("Stage_at_H") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasSuppRes": #ok
-            fld2Base = ["Measuremen","Measurem_1"]
-            fld2New  = ["Measuremen_1","Measurem_1_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 4):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if fld2Base[i] == "Measurem_1":
+                    if (fld2Base[i].find("Measurem_1") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasARGenes": #ok
-            fld2Base = ["Upper","Lower","Target","Presence_o","Value","Units"]
-            fld2New  = ["Upper_1","Lower_1","Target_1","Presence_o_1","Value_1","Units_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 5):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if (fld2Base[i] == "Presence_o") or (fld2Base[i] == "Units"):
+                    if (fld2Base[i].find("Presence_o") > -1) or (fld2Base[i].find("Units") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasNutrEff": #ok
-            fld2Base = ["Fraction_N","Nitrogen_U","Agronomic","Nutrient_e","Nitrogen15"]
-            fld2New  = ["Fraction_N_1","Nitrogen_U_1","Agronomic_1","Nutrient_e_1","Nitrogen15_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 6):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasCropForageQuality": #ok
-            fld2Base = ["Value","Unit","Chemical_C","Value_STD"]
-            fld2New  = ["Value_1","Unit_1","Chemical_C_1","Value_STD_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 7):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if (fld2Base[i] == "Chemical_C") or (fld2Base[i] == "Unit"):
+                    if (fld2Base[i].find("Chemical_C") > -1) or (fld2Base[i].find("Unit") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasGasNutrientLoss": #ok
-            fld2Base = ["NOx_N_g_ha","N2_N_g_ha_","N2O_N_g_ha","NH3_N_kg_h","NOx_N_STD","N2_N_STD_g","N2O_N_STD","NH3_N_STD"]
-            fld2New  = ["NOx_N_g_ha_1","N2_N_g_ha__1","N2O_N_g_ha_1","NH3_N_kg_h_1","NOx_N_STD_1","N2_N_STD_g_1","N2O_N_STD_1","NH3_N_STD_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 8):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasPlantMonitoring": #ok
-            fld2Base = ["Test_Value","Test_Units","Crop_Monit","Test_Val_1"]
-            fld2New  = ["Test_Value_1","Test_Units_1","Crop_Monit_1","Test_Val_1_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 3):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if (fld2Base[i] == "Crop_Monit") or (fld2Base[i] == "Test_Units"):
+                    if (fld2Base[i].find("Crop_Monit") > -1) or (fld2Base[i].find("Test_Units") > -1) or (fld2Base[i].find("Growth_Sta") > -1) or (fld2Base[i].find("Crop") > -1) or (fld2Base[i].find("Model_if_s") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasYieldNutUptake": #ok
-            fld2Base = ["Frac_Dry_M","Frac_Moist","Frac_C_kgC","Frac_N_kgN","Frac_P_kgP","Frac_K_kgK","Frac_S_kgS","Frac_Ca_kg","Frac_Mg_kg","Frac_Cu_gC","Frac_Fe_gF","Frac_Mn_gM","Frac_Zn_gZ","Frac_B_gB_","Frac_Mo_gM","Grain_Weig","Frac_Dry_1","Frac_Moi_1","Frac_C_STD","Frac_N_STD","Frac_P_STD","Frac_K_STD","Frac_S_STD","Frac_Ca_ST","Frac_Mg_ST","Frac_Cu_ST","Frac_Fe_ST","Frac_Mn_ST","Frac_Zn_ST","Frac_B_STD","Frac_Mo_ST","Grain_We_1"]
-            fld2New  = ["Frac_Dry_M_1","Frac_Moist_1","Frac_C_kgC_1","Frac_N_kgN_1","Frac_P_kgP_1","Frac_K_kgK_1","Frac_S_kgS_1","Frac_Ca_kg_1","Frac_Mg_kg_1","Frac_Cu_gC_1","Frac_Fe_gF_1","Frac_Mn_gM_1","Frac_Zn_gZ_1","Frac_B_gB__1","Frac_Mo_gM_1","Grain_Weig_1","Frac_Dry_1_1","Frac_Moi_1_1","Frac_C_STD_1","Frac_N_STD_1","Frac_P_STD_1","Frac_K_STD_1","Frac_S_STD_1","Frac_Ca_ST_1","Frac_Mg_ST_1","Frac_Cu_ST_1","Frac_Fe_ST_1","Frac_Mn_ST_1","Frac_Zn_ST_1","Frac_B_STD_1","Frac_Mo_ST_1","Grain_We_1_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 7):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasNutrientCycling": # test
-            fld2Base = ["Corn_Ear_H","Above_G_Bi","Unit_Grain","Grain_Dry","Grain_Mois","Grain_C_kg","Grain_N_kg","Grain_P_kg","Grain_K_kg","Grain_S_kg","Grain_Ca_k","Grain_Mg_k","Grain_Cu_g","Grain_Fe_g","Grain_Mn_g","Grain_Zn_g","Grain_B_gB","Grain_Mo_g","Harv_NonGr","Harv_Res_M","Harv_Res_C","Harv_Res_N","Harv_Res_P","Harv_Res_K","Harv_Res_S","Harv_Res_1","Harv_Res_2","Harv_Res_3","Harv_Res_F","Harv_Res_4","Harv_Res_Z","Harv_Res_B","Harv_Res_5","NonHarv_No","NonHarv_Re","NonHarv__1","NonHarv__2","nonHarv__3","nonHarv__4","nonHarv__5","nonHarv__6","nonHarv__7","nonHarv__8","nonHarv__9","nonHarv_10","nonHarv_11","nonHarv_12","nonHarv_13","Corn_Ear_1","Above_Grou","Unit_Gra_1","Grain_DryM","Grain_Mo_1","Grain_C_ST","Grain_N_ST","Grain_P_ST","Grain_K_ST","Grain_S_ST","Grain_Ca_S","Grain_Mg_S","Grain_Cu_S","Grain_Fe_S","Grain_Mn_S","Grain_Zn_S","Grain_B_ST","Grain_Mo_S","Harv_Res_D","HarvRes_Mo","Harv_Res_6","Harv_Res_7","Harv_Res_8","Harv_Res_9","Harv_Re_10","Harv_Re_11","Harv_Re_12","Harv_Re_13","Harv_Re_14","Harv_Re_15","Harv_Re_16","Harv_Re_17","Harv_Re_18","nonHarv_14","nonHarv_15","nonHarv_16","nonHarv_17","nonHarv_18","nonHarv_19","nonHarv_20","nonHarv_21","nonHarv_22","nonHarv_23","nonHarv_24","nonHarv_25","nonHarv_26","nonHarv_27","nonHarv_28"]
-            fld2New  = ["Corn_Ear_H_1","Above_G_Bi_1","Unit_Grain_1","Grain_Dry_1","Grain_Mois_1","Grain_C_kg_1","Grain_N_kg_1","Grain_P_kg_1","Grain_K_kg_1","Grain_S_kg_1","Grain_Ca_k_1","Grain_Mg_k_1","Grain_Cu_g_1","Grain_Fe_g_1","Grain_Mn_g_1","Grain_Zn_g_1","Grain_B_gB_1","Grain_Mo_g_1","Harv_NonGr_1","Harv_Res_M_1","Harv_Res_C_1","Harv_Res_N_1","Harv_Res_P_1","Harv_Res_K_1","Harv_Res_S_1","Harv_Res_1_1","Harv_Res_2_1","Harv_Res_3_1","Harv_Res_F_1","Harv_Res_4_1","Harv_Res_Z_1","Harv_Res_B_1","Harv_Res_5_1","NonHarv_No_1","NonHarv_Re_1","NonHarv__1_1","NonHarv__2_1","nonHarv__3_1","nonHarv__4_1","nonHarv__5_1","nonHarv__6_1","nonHarv__7_1","nonHarv__8_1","nonHarv__9_1","nonHarv_10_1","nonHarv_11_1","nonHarv_12_1","nonHarv_13_1","Corn_Ear_1_1","Above_Grou_1","Unit_Gra_1_1","Grain_DryM_1","Grain_Mo_1_1","Grain_C_ST_1","Grain_N_ST_1","Grain_P_ST_1","Grain_K_ST_1","Grain_S_ST_1","Grain_Ca_S_1","Grain_Mg_S_1","Grain_Cu_S_1","Grain_Fe_S_1","Grain_Mn_S_1","Grain_Zn_S_1","Grain_B_ST_1","Grain_Mo_S_1","Harv_Res_D_1","HarvRes_Mo_1","Harv_Res_6_1","Harv_Res_7_1","Harv_Res_8_1","Harv_Res_9_1","Harv_Re_10_1","Harv_Re_11_1","Harv_Re_12_1","Harv_Re_13_1","Harv_Re_14_1","Harv_Re_15_1","Harv_Re_16_1","Harv_Re_17_1","Harv_Re_18_1","nonHarv_14_1","nonHarv_15_1","nonHarv_16_1","nonHarv_17_1","nonHarv_18_1","nonHarv_19_1","nonHarv_20_1","nonHarv_21_1","nonHarv_22_1","nonHarv_23_1","nonHarv_24_1","nonHarv_25_1","nonHarv_26_1","nonHarv_27_1","nonHarv_28_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 7):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasWaterQualityArea": #ok
-            fld2Base = ["Sampling_D","Losses_or","Erosion_Me","Erosion_t","Erosion_To","Erosion__1","Soil_organ","Soil_org_1","Water_mm","kg_total_N","kg_total_P","kg_NH4_N_h","kg_NO3_N_h","Total_Diss","Total_Di_1","kg_total_C","pH","EC_mS_cm","Dissolved","Dissolve_1","Dissolve_2","Dissolve_3","Dissolve_4","Dissolve_5","Dissolve_6","Dissolve_7","Dissolve_8","Dissolve_9","Dissolv_10","Dissolv_11","Dissolv_12","Erosion__2","Erosion__3","Erosion__4","Soil_org_2","Soil_org_3","Water_mm_S","kg_total_1","kg_total_2","kg_NH4_N_1","kg_NO3_N_1","Total_Di_2","Total_Di_3","kg_total_3","pH_STD","EC_mS_cm_S","Dissolv_13","Dissolv_14","Dissolv_15","Dissolv_16","Dissolv_17","Dissolv_18","Dissolv_19","Dissolv_20","Dissolv_21","Dissolv_22","Dissolv_23","Dissolv_24","Dissolv_25"]
-            fld2New  = ["Sampling_D_1","Losses_or_1","Erosion_Me_1","Erosion_t_1","Erosion_To_1","Erosion__1_1","Soil_organ_1","Soil_org_1_1","Water_mm_1","kg_total_N_1","kg_total_P_1","kg_NH4_N_h_1","kg_NO3_N_h_1","Total_Diss_1","Total_Di_1_1","kg_total_C_1","pH_1","EC_mS_cm_1","Dissolved_1","Dissolve_1_1","Dissolve_2_1","Dissolve_3_1","Dissolve_4_1","Dissolve_5_1","Dissolve_6_1","Dissolve_7_1","Dissolve_8_1","Dissolve_9_1","Dissolv_10_1","Dissolv_11_1","Dissolv_12_1","Erosion__2_1","Erosion__3_1","Erosion__4_1","Soil_org_2_1","Soil_org_3_1","Water_mm_S_1","kg_total_1_1","kg_total_2_1","kg_NH4_N_1_1","kg_NO3_N_1_1","Total_Di_2_1","Total_Di_3_1","kg_total_3_1","pH_STD_1","EC_mS_cm_S_1","Dissolv_13_1","Dissolv_14_1","Dissolv_15_1","Dissolv_16_1","Dissolv_17_1","Dissolv_18_1","Dissolv_19_1","Dissolv_20_1","Dissolv_21_1","Dissolv_22_1","Dissolv_23_1","Dissolv_24_1","Dissolv_25_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 9):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if (fld2Base[i] == "Losses_or") or (fld2Base[i] == "Erosion_Me"):
+                    if (fld2Base[i].find("Losses_or") > -1) or (fld2Base[i].find("Erosion_Me") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasWaterQualityConc": #ok
-            fld2Base = ["Sampling_D","Losses_or","Erosion_Me","Erosion_kg","Erosion_To","Erosion__1","Soil_organ","Soil_org_1","Water_mm","mg_total_N","mg_Total_P","mg_NH4_N_L","mg_NO3_N_L","Total_Diss","Total_Di_1","mg_Cl_L","pH","EC_mS_cm","Dissolved","Dissolve_1","Dissolve_2","Dissolve_3","Dissolve_4","Dissolve_5","Dissolve_6","Dissolve_7","Dissolve_8","Dissolve_9","Dissolv_10","Dissolv_11","Dissolv_12","Erosion__2","Erosion__3","Erosion__4","Soil_org_2","Soil_org_3","Water_mm_S","mg_total_1","mg_total_2","mg_NH4_N_1","mg_NO3_N_1","Total_Di_2","Total_Di_3","mg_total_C","pH_STD","EC_mS_cm_S","Dissolv_13","Dissolv_14","Dissolv_15","Dissolv_16","Dissolv_17","Dissolv_18","Dissolv_19","Dissolv_20","Dissolv_21","Dissolv_22","Dissolv_23","Dissolv_24","Dissolv_25"]
-            fld2New  = ["Sampling_D_1","Losses_or_1","Erosion_Me_1","Erosion_kg_1","Erosion_To_1","Erosion__1_1","Soil_organ_1","Soil_org_1_1","Water_mm_1","mg_total_N_1","mg_Total_P_1","mg_NH4_N_L_1","mg_NO3_N_L_1","Total_Diss_1","Total_Di_1_1","mg_Cl_L_1","pH_1","EC_mS_cm_1","Dissolved_1","Dissolve_1_1","Dissolve_2_1","Dissolve_3_1","Dissolve_4_1","Dissolve_5_1","Dissolve_6_1","Dissolve_7_1","Dissolve_8_1","Dissolve_9_1","Dissolv_10_1","Dissolv_11_1","Dissolv_12_1","Erosion__2_1","Erosion__3_1","Erosion__4_1","Soil_org_2_1","Soil_org_3_1","Water_mm_S_1","mg_total_1_1","mg_total_2_1","mg_NH4_N_1_1","mg_NO3_N_1_1","Total_Di_2_1","Total_Di_3_1","mg_total_C_1","pH_STD_1","EC_mS_cm_S_1","Dissolv_13_1","Dissolv_14_1","Dissolv_15_1","Dissolv_16_1","Dissolv_17_1","Dissolv_18_1","Dissolv_19_1","Dissolv_20_1","Dissolv_21_1","Dissolv_22_1","Dissolv_23_1","Dissolv_24_1","Dissolv_25_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 9):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):
-                    if (fld2Base[i] == "Losses_or") or (fld2Base[i] == "Erosion_Me"):
+                    if (fld2Base[i].find("Losses_or") > -1) or (fld2Base[i].find("Erosion_Me") > -1):
                         arcpy.AddField_management(fc,fld2New[i], "Text", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")                                  
                     else:
                         arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasWindErosionArea": #ok
-            fld2Base = ["Soil_t_ha","Soil_organ","Soil_org_1","pH","EC_mS_cm","kg_total_N","kg_NH4_N_h","kg_NO3_N_h","kg_total_P","kg_K_ha","kg_S_ha","kg_Ca_ha","kg_Mg_ha","g_Cu_ha","g_Fe_ha","g_Mn_ha","g_Zn_ha","g_B_ha","g_Mo_ha","kg_Al_ha","kg_Na_ha","kg_Si_ha","Soil_t_h_1","Soil_org_2","Soil_org_3","pH_STD","EC_mS_cm_S","kg_total_1","kg_NH4_N_1","kg_NO3_N_1","kg_total_2","kg_K_ha_ST","kg_S_ha_ST","kg_Ca_ha_S","kg_Mg_ha_S","g_Cu_ha_ST","g_Fe_ha_ST","g_Mn_ha_ST","g_Zn_ha_ST","g_B_ha_STD","g_Mo_ha_ST","kg_Al_ha_S","kg_Na_ha_S","kg_Si_ha_S"]
-            fld2New  = ["Soil_t_ha_1","Soil_organ_1","Soil_org_1_1","pH_1","EC_mS_cm_1","kg_total_N_1","kg_NH4_N_h_1","kg_NO3_N_h_1","kg_total_P_1","kg_K_ha_1","kg_S_ha_1","kg_Ca_ha_1","kg_Mg_ha_1","g_Cu_ha_1","g_Fe_ha_1","g_Mn_ha_1","g_Zn_ha_1","g_B_ha_1","g_Mo_ha_1","kg_Al_ha_1","kg_Na_ha_1","kg_Si_ha_1","Soil_t_h_1_1","Soil_org_2_1","Soil_org_3_1","pH_STD_1","EC_mS_cm_S_1","kg_total_1_1","kg_NH4_N_1_1","kg_NO3_N_1_1","kg_total_2_1","kg_K_ha_ST_1","kg_S_ha_ST_1","kg_Ca_ha_S_1","kg_Mg_ha_S_1","g_Cu_ha_ST_1","g_Fe_ha_ST_1","g_Mn_ha_ST_1","g_Zn_ha_ST_1","g_B_ha_STD_1","g_Mo_ha_ST_1","kg_Al_ha_S_1","kg_Na_ha_S_1","kg_Si_ha_S_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 10):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
                     arcpy.CalculateField_management(fc,fld2New[i],"["+fld2Base[i]+"]")
                     arcpy.DeleteField_management(fc, fld2Base[i])
         elif sheet == "MeasWindErosionConc": #ok
-            fld2Base = ["Soil_t","Soil_organ","Soil_org_1","pH","EC_mS_cm","mg_N_kg","mg_NH4_N_k","mg_NO3_N_k","mg_P_kg","mg_K_kg","mg_S_kg","mg_Ca_kg","mg_Mg_kg","ug_Cu_kg","ug_Fe_kg","ug_Mn_kg","ug_Zn_kg","ug_B_kg","ug_Mo_kg","mg_Al_kg","mg_Na_kg","mg_Si_kg","Soil_t_STD","Soil_org_2","Soil_org_3","pH_STD","EC_mS_cm_S","mg_N_kg_ST","mg_NH4_N_1","mg_NO3_N_1","mg_P_kg_ST","mg_K_kg_ST","mg_S_kg_ST","mg_Ca_kg_S","mg_Mg_kg_S","ug_Cu_kg_S","ug_Fe_kg_S","ug_Mn_kg_S","ug_Zn_kg_S","ug_B_kg_ST","ug_Mo_kg_S","mg_Al_kg_S","mg_Na_kg_S","mg_Si_kg_S"]
-            fld2New  = ["Soil_t_1","Soil_organ_1","Soil_org_1_1","pH_1","EC_mS_cm_1","mg_N_kg_1","mg_NH4_N_k_1","mg_NO3_N_k_1","mg_P_kg_1","mg_K_kg_1","mg_S_kg_1","mg_Ca_kg_1","mg_Mg_kg_1","ug_Cu_kg_1","ug_Fe_kg_1","ug_Mn_kg_1","ug_Zn_kg_1","ug_B_kg_1","ug_Mo_kg_1","mg_Al_kg_1","mg_Na_kg_1","mg_Si_kg_1","Soil_t_STD_1","Soil_org_2_1","Soil_org_3_1","pH_STD_1","EC_mS_cm_S_1","mg_N_kg_ST_1","mg_NH4_N_1_1","mg_NO3_N_1_1","mg_P_kg_ST_1","mg_K_kg_ST_1","mg_S_kg_ST_1","mg_Ca_kg_S_1","mg_Mg_kg_S_1","ug_Cu_kg_S_1","ug_Fe_kg_S_1","ug_Mn_kg_S_1","ug_Zn_kg_S_1","ug_B_kg_ST_1","ug_Mo_kg_S_1","mg_Al_kg_S_1","mg_Na_kg_S_1","mg_Si_kg_S_1"]
+            j = 0
+            for fc in fcs:
+                for fldOb in arcpy.ListFields (fc):
+                    if (j > 10):
+                        fld2Base.append(fldOb.name)
+                        fld2New.append(fldOb.name + "1")
+                    j = j + 1  
             for fc in fcs:
                 for i in range(0, len(fld2Base)):            
                     arcpy.AddField_management(fc,fld2New[i], "Double", "", "", "", fld2New[i], "NULLABLE", "NON_REQUIRED")         
@@ -380,6 +541,10 @@ try:
         print sheet + " done"
 
     #for testing
+    #for i in range(0, len(fld2Base)):
+            #print fld2Base[i]
+            #print fld2New[i]
+
     #for fc in fcs:
     #    for fldOb in arcpy.ListFields (fc):
     #        fld = fldOb.name
